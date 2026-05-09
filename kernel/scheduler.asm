@@ -1,23 +1,22 @@
-; =========================================
-; Definição de qual tarefa será executada:
-; Modelo simple round-robin 
-; =========================================
+; ============================================================================
+; Cooperative round-robin scheduler metadata.
+; ============================================================================
 
-init_scheduler: 
-
+init_scheduler:
     mov byte [current_task], 0
-    ret 
+    mov byte [task_table + 0], TASK_RUNNING
+    mov byte [task_table + 1], TASK_READY
+    mov byte [task_table + 2], TASK_READY
+    mov byte [task_table + 3], TASK_BLOCKED
+    ret
 
-scheduler:
-
+schedule_next:
     inc byte [current_task]
-    cmp byte [current_task], MAX_TASKS 
-    jl done 
+    cmp byte [current_task], MAX_TASKS
+    jb .done
+    mov byte [current_task], 0
+.done:
+    ret
 
-    mov byte [current_tasks], 0
-
-done:
-    ret 
-
-    MAX_TASKS equ 4
-    current_tasks db 0 
+current_task db 0
+task_table times MAX_TASKS db TASK_BLOCKED

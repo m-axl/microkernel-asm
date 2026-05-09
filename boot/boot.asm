@@ -1,29 +1,58 @@
-; =======================================================================
-; Primeira instrução a ser executada pela CPU/Processador. 
-; Ela carrega o endereço do próximo código a ser executado. 
-; =======================================================================
+; ============================================================================
+; Stage 1 BIOS boot sector
+; ============================================================================
+; Loads the flat kernel image from disk sector 2 into 0000:1000 and jumps to it.
 
-org 0x7c000 
+[bits 16]
+[org 0x7C00]
 
-mov ah, 0x02 
-mov al, 10
-mov ch, 0
-mov cl, 2
-mov dh, 0 
-mov bx, 0x1000
-int 0x13
+KERNEL_OFFSET  equ 0x1000
+KERNEL_SECTORS equ 8
 
-jmp 0x00000:0x1000
+start:
+    cli
+    xor ax, ax
+    mov ds, ax
+    mov es, ax
+    mov ss, ax
+    mov sp, 0x7C00
+    sti
 
-times 510-($-$$) db 0
-dw 0xaa55
+    mov [boot_drive], dl
 
-; ====================================================================================================================================
-; O código acima é um exemplo de um setor de boot (boot sector) para um sistema operacional.
-; Ele é carregado pela BIOS quando o computador é ligado. O código realiza as seguintes ações:
+    mov ah, 0x02
+    mov al, KERNEL_SECTORS
+    mov ch, 0x00
+    mov cl, 0x02
+    mov dh, 0x00
+    mov dl, [boot_drive]
+    mov bx, KERNEL_OFFSET
+    int 0x13
+    jc disk_error
 
-; 1. Define a origem do código a ser carregado (0x7c00).
-; 2. Usa a interrupção 0x13 para ler o segundo setor do disco (setor 2) para o endereço de memória 0x1000.
-; 3. Salta para o endereço 0x1000, onde o próximo código do sistema operacional deve estar localizado.
-; 4. Preenche o restante do setor de boot com zeros e adiciona a assinatura de boot (0xaa55) no final, indicando que é um setor de boot válido.
-; ====================================================================================================================================
+    jmp 0x0000:KERNEL_OFFSET
+
+disk_error:
+    mov si, disk_error_msg
+    call bios_print
+
+.halt:
+    hlt
+    jmp .halt
+
+bios_print:
+    lodsb
+    test al, al
+    jz .done
+    mov ah, 0x0E
+    mov bh, 0x00
+    int 0x10
+    jmp bios_print
+.done:
+    ret
+
+boot_drive db 0
+disk_error_msg db "Disk read error", 13, 10, 0
+
+times 510 - ($ - $$) db 0
+dw 0xAA55
