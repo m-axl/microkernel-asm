@@ -1,200 +1,135 @@
-Microkernel x86-64 (Assembly)
+# Microkernel ASM
 
-Overview
+Kernel minimo experimental em Assembly para estudar boot, arquitetura de
+microkernel, IPC, escalonamento e memoria em baixo nivel.
 
-This project is a minimal microkernel written entirely in x86-64 Assembly, designed for low-level system understanding and experimental kernel engineering.
+## Estado atual
 
-The architecture follows a true microkernel design, where only essential mechanisms are implemented in kernel space:
+**Milestone 0:** base bootavel BIOS em modo real de 16 bits.
 
-- Task scheduling
-- Memory management (basic paging model)
-- Inter-process communication (IPC)
+O projeto agora gera uma imagem `build/os.img` com:
 
-All other services are intended to run in user space.
+- boot sector valido;
+- kernel carregado em `0x1000`;
+- tela VGA em estilo terminal Unix/DOS;
+- saida serial COM1 para debug;
+- inicializacao de memoria, scheduler, IPC e stubs de servidores;
+- testes de build e qualidade via `make check` e `make quality`.
 
----
+## Previa
 
-Architecture
+```text
+ microkernel.asm  v0.1  |  signed by @ghostroot
+ --------------------------------------------------------
 
-Hardware
-   │
-Bootloader
-   │
-Microkernel
-   ├── Scheduler
-   ├── Memory Manager
-   └── IPC
-   │
-User-space Servers
-   ├── File System
-   ├── Drivers
-   └── Other Services
+ [ok] memory allocator online
+ [ok] round-robin scheduler table online
+ [ok] ipc mailbox online
+ [ok] user-space server stubs registered
 
----
+ root@microkernel:/# _
+```
 
-Project Structure
+## Arquitetura
 
-microkernel/
-│
+```mermaid
+flowchart TD
+    BIOS[BIOS] --> Boot[Boot sector]
+    Boot --> Kernel[Microkernel]
+    Kernel --> Memory[Memory manager]
+    Kernel --> Scheduler[Scheduler]
+    Kernel --> IPC[IPC mailbox]
+    Kernel --> Servers[User-space server stubs]
+    Servers --> FS[File system server]
+    Servers --> Drivers[Driver server]
+```
+
+## Estrutura
+
+```text
+.
 ├── boot/
 │   └── boot.asm
-│
-├── kernel/
-│   ├── kernel.asm
-│   ├── scheduler.asm
-│   ├── memory.asm
-│   ├── ipc.asm
-│
+├── docs/
+│   ├── architecture.md
+│   ├── error-analysis.md
+│   └── testing.md
 ├── include/
 │   └── kernel.inc
-│
+├── kernel/
+│   ├── ipc.asm
+│   ├── kernel.asm
+│   ├── memory.asm
+│   └── scheduler.asm
+├── scripts/
+│   └── quality.sh
 ├── servers/
-│   ├── fs_server.asm
-│   └── driver_server.asm
-│
-├── link.ld
-├── Makefile
-└── README.md
+│   ├── driver_server.asm
+│   └── fs_server.asm
+└── Makefile
+```
 
----
+## Dependencias
 
-Build Requirements
+```sh
+sudo apt install nasm make qemu-system-x86
+```
 
-- NASM
-- GNU LD
-- QEMU
-- Linux environment (recommended)
+## Build e testes
 
-Install dependencies (Debian/Ubuntu):
-
-sudo apt install nasm gcc ld qemu-system-x86
-
----
-
-Build & Run
-
-Build the system
-
+```sh
 make
+make check
+make quality
+```
 
-Run in QEMU
+Executar no QEMU:
 
+```sh
 make run
+```
 
-Debug mode
+Debug:
 
+```sh
 make debug
+```
 
-This enables:
+## Documentacao
 
-- serial output
-- CPU state tracing
-- GDB stub ("-s -S")
+- [Arquitetura](docs/architecture.md)
+- [Analise de erros](docs/error-analysis.md)
+- [Assinatura digital](docs/signature.md)
+- [Testes e qualidade](docs/testing.md)
 
----
+## Roadmap
 
-Boot Process
+- [x] Boot sector BIOS valido
+- [x] Kernel minimo carregado por disco
+- [x] Console VGA com aparencia inicial
+- [x] Stubs de memoria, scheduler, IPC e servidores
+- [ ] Ativar A20
+- [ ] Entrar em protected mode
+- [ ] Criar GDT/IDT reais
+- [ ] Entrar em long mode x86-64
+- [ ] Implementar paginacao PML4
+- [ ] Implementar interrupcao de timer
+- [ ] Implementar troca de contexto real
+- [ ] Criar ABI de IPC para servidores
+- [ ] Adicionar processos ring3
+- [ ] Criar loader ELF simples
 
-1. BIOS loads bootloader at "0x7C00"
-2. Bootloader loads kernel into memory ("0x100000")
-3. Execution jumps to kernel entry point
-4. Kernel initializes:
-   - memory
-   - scheduler
-   - IPC
-5. User-space servers are started
+## Convencao de commits
 
----
+Use mensagens objetivas por area:
 
-Key Components
+```text
+boot: implement disk loader
+kernel: add vga console
+docs: document milestone 0
+test: add image quality checks
+```
 
-Bootloader
+## Licenca
 
-- Loads kernel sectors from disk
-- Transfers control to kernel memory
-
-Kernel Core
-
-- Entry point and initialization logic
-
-Scheduler
-
-- Round-robin task switching
-- Task Control Block (TCB)
-
-Memory Manager
-
-- Simple page allocator (4KB pages)
-
-IPC
-
-- Message-based communication
-- Decouples services from kernel
-
----
-
-Debugging
-
-Primary methods:
-
-- Serial output (COM1) → reliable for kernel debugging
-- QEMU debug flags → CPU/interrupt tracing
-- GDB remote debugging
-
-Example:
-
-qemu-system-x86_64 -drive format=raw,file=build/os.img -serial stdio -s -S
-
----
-
-Known Limitations
-
-- No full paging implementation yet
-- No user-mode isolation (ring3 not active)
-- No real filesystem
-- Limited interrupt handling
-- Static memory model
-
----
-
-Roadmap
-
-- [ ] Protected mode transition
-- [ ] Long mode activation
-- [ ] Full paging (PML4)
-- [ ] System call interface
-- [ ] User-mode processes
-- [ ] Driver abstraction
-- [ ] Filesystem server
-- [ ] ELF loader
-
----
-
-Commit Convention
-
-area: description
-
-Examples:
-
-boot: implement sector loading
-kernel: add entry point
-memory: implement page allocator
-scheduler: add round robin logic
-ipc: add message queue
-debug: add serial output
-
----
-
-References
-
-- Intel Software Developer Manual
-- OSDev Wiki
-- Microkernel architecture research
-
----
-
-License
-
-MIT License
-
----
+MIT.
