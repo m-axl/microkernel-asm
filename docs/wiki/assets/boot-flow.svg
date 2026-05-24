@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1120" height="420" viewBox="0 0 1120 420" role="img" aria-labelledby="title desc">
+  <title id="title">NeXus boot flow</title>
+  <desc id="desc">Boot stages from BIOS to real mode, protected mode and long mode.</desc>
+  <defs>
+    <style>
+      .bg { fill: #0b1120; }
+      .box { fill: #172033; stroke: #60a5fa; stroke-width: 2; rx: 10; }
+      .active { fill: #12343b; stroke: #2dd4bf; stroke-width: 2; rx: 10; }
+      .wait { fill: #2a2139; stroke: #a78bfa; stroke-width: 2; rx: 10; }
+      .text { font: 16px monospace; fill: #e5e7eb; }
+      .small { font: 13px monospace; fill: #cbd5e1; }
+      .title { font: 28px monospace; font-weight: 700; fill: #f8fafc; }
+      .arrow { stroke: #94a3b8; stroke-width: 2.5; fill: none; marker-end: url(#arrow); }
+    </style>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L0,6 L9,3 z" fill="#94a3b8"/>
+    </marker>
+  </defs>
+  <rect class="bg" width="1120" height="420"/>
+  <text x="40" y="54" class="title">Boot flow - NeXus M2</text>
+
+  <rect x="45" y="130" width="150" height="120" class="box"/>
+  <text x="78" y="166" class="text">BIOS</text>
+  <text x="70" y="196" class="small">loads sector</text>
+  <text x="70" y="216" class="small">0x7C00</text>
+
+  <rect x="245" y="130" width="170" height="120" class="box"/>
+  <text x="278" y="166" class="text">Boot sector</text>
+  <text x="273" y="196" class="small">boot/boot.asm</text>
+  <text x="273" y="216" class="small">loads 8 sectors</text>
+
+  <rect x="465" y="130" width="170" height="120" class="box"/>
+  <text x="502" y="166" class="text">Real mode</text>
+  <text x="493" y="196" class="small">0x1000 entry</text>
+  <text x="493" y="216" class="small">serial banner</text>
+
+  <rect x="685" y="130" width="170" height="120" class="active"/>
+  <text x="710" y="166" class="text">Protected</text>
+  <text x="713" y="196" class="small">GDT + CR0.PE</text>
+  <text x="713" y="216" class="small">setup PML4</text>
+
+  <rect x="905" y="130" width="170" height="120" class="active"/>
+  <text x="948" y="166" class="text">Long mode</text>
+  <text x="933" y="196" class="small">PAE + EFER.LME</text>
+  <text x="933" y="216" class="small">64-bit kernel</text>
+
+  <path d="M195 190 H245" class="arrow"/>
+  <path d="M415 190 H465" class="arrow"/>
+  <path d="M635 190 H685" class="arrow"/>
+  <path d="M855 190 H905" class="arrow"/>
+
+  <rect x="245" y="305" width="830" height="58" class="wait"/>
+  <text x="275" y="340" class="text">M2 ready state: serial diagnostics, PML4 identity map, IDT loaded, CPU halted safely</text>
+</svg>
