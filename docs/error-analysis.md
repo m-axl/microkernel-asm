@@ -1,7 +1,8 @@
-# Analise de erros
+# Analise de erros - NeXus
 
 Este documento registra o estado encontrado antes da retomada e as correcoes
-aplicadas para criar uma base minima compilavel.
+aplicadas para criar uma base minima compilavel. O projeto agora usa o nome
+NeXus; `microkernel-asm` permanece apenas como nome historico do repositorio.
 
 ## Erros encontrados
 

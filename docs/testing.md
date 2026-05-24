@@ -1,4 +1,6 @@
-# Testes e qualidade
+# Testes e qualidade - NeXus
+
+**Versão atual:** `0.2.0-m2`
 
 ## Dependências
 
@@ -23,6 +25,12 @@ make pm         # Compila versão protected mode
 make clean      # Remove todos os artifacts
 ```
 
+### Long Mode (Milestone 2)
+```sh
+make lm         # Compila versão long mode x86-64
+make clean      # Remove todos os artifacts
+```
+
 ## Validação e Testes
 
 ### Checks de build
@@ -36,7 +44,7 @@ make quality    # Executa check + static analysis (scripts/quality.sh)
 - Boot sector signature é `55 aa`
 - `kernel.bin` cabe nos 8 setores (4096 bytes max)
 - `os.img` possui tamanho esperado (512 + 4096 = 4608 bytes)
-- Boot e kernel recompilam isoladamente com NASM
+- Boot, kernel M0, kernel M1 e kernel M2 recompilam isoladamente com NASM
 
 ## Execução
 
@@ -50,6 +58,12 @@ make debug      # Executa com serial em stdio + GDB stub na porta 1234
 ```sh
 make pm-run     # Executa versão PM em QEMU (headless)
 make pm-debug   # Executa com serial em stdio + GDB stub
+```
+
+### Long Mode
+```sh
+make lm-run     # Executa versão LM em QEMU
+make lm-debug   # Executa com serial em stdio + GDB stub
 ```
 
 ## Debugging
@@ -88,6 +102,7 @@ od -An -tx1 -j510 -N2 build/os.img  # Bytes 510-511 (boot signature)
 ```bash
 stat build/os.img              # Deve ser 4608 bytes
 stat build/os_pm.img           # Deve ser 4608 bytes (PM)
+stat build/os_lm.img           # Deve ser 4608 bytes (LM)
 ```
 
 ## Limites Atuais

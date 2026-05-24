@@ -1,5 +1,5 @@
 ; ============================================================================
-; Microkernel ASM - Milestone 0 kernel entry
+; NeXus - Milestone 0 kernel entry
 ; ============================================================================
 ; This is a real-mode bootstrap kernel. It gives the project a bootable,
 ; testable baseline before protected mode, long mode, paging and ring3 servers.
@@ -192,15 +192,15 @@ serial_write_char:
 
 cursor_offset dw 0
 
-serial_banner db "Microkernel ASM milestone 0", 13, 10, 0
-title_line db " microkernel.asm  v0.1  |  signed by @ghostroot", 0
+serial_banner db "NeXus milestone 0", 13, 10, 0
+title_line db " NeXus  v0.2.0-m2  |  signed by @ghostroot", 0
 subtitle_line db " --------------------------------------------------------", 0
 ok_prefix db " [ok] ", 0
 memory_msg db "memory allocator online", 0
 scheduler_msg db "round-robin scheduler table online", 0
 ipc_msg db "ipc mailbox online", 0
 servers_msg db "user-space server stubs registered", 0
-shell_msg db 10, " root@microkernel:/# _", 0
+shell_msg db 10, " root@nexus:/# _", 0
 blank_line db 0
 
 times 4096 - ($ - $$) db 0

@@ -1,5 +1,5 @@
 ; ============================================================================
-; Microkernel ASM - Protected Mode Kernel (Milestone 1)
+; NeXus - Protected Mode Kernel (Milestone 1)
 ; ============================================================================
 ; This kernel runs in protected mode (32-bit) with GDT setup.
 ; It transitions from real mode and establishes the foundation for 64-bit.
@@ -326,15 +326,15 @@ gdt_ptr_pm:
 pm_cursor_offset dd 0
 pm_free_mem dd 0
 
-serial_banner_pm db "Microkernel ASM milestone 1 (protected mode)", 13, 10, 0
-title_line_pm db " microkernel.asm  v0.2-pm  |  protected mode", 0
+serial_banner_pm db "NeXus milestone 1 (protected mode)", 13, 10, 0
+title_line_pm db " NeXus  v0.2.0-m2  |  protected mode", 0
 subtitle_line_pm db " --------------------------------------------------------", 0
 ok_prefix_pm db " [ok] ", 0
 memory_msg_pm db "memory allocator online", 0
 scheduler_msg_pm db "round-robin scheduler table online", 0
 ipc_msg_pm db "ipc mailbox online", 0
 servers_msg_pm db "user-space server stubs registered", 0
-shell_msg_pm db 10, " root@microkernel:/# _", 0
+shell_msg_pm db 10, " root@nexus:/# _", 0
 blank_line_pm db 0
 
 times 4096 - ($ - $$) db 0

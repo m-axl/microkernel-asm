@@ -1,6 +1,10 @@
 # Assinatura digital do projeto
 
-Projeto: `microkernel-asm`
+Projeto: `NeXus`
+
+Nome historico do repositorio: `microkernel-asm`
+
+Versao atual: `0.2.0-m2`
 
 Autor Git: `@ghostroot`
 
@@ -17,5 +21,5 @@ Esta assinatura identifica a autoria local usada para evoluir o marco inicial do
 kernel minimo. Ela tambem aparece no banner VGA do kernel:
 
 ```text
- microkernel.asm  v0.1  |  signed by @ghostroot
+ NeXus  v0.2.0-m2  |  signed by @ghostroot
 ```

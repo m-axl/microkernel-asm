@@ -1,4 +1,6 @@
-# Build e Execução
+# Build e Execução - NeXus
+
+**Versão atual:** `0.2.0-m2`
 
 ## Dependências
 
@@ -18,6 +20,11 @@ make clean      # Remove artifacts de build
 ### Milestone 1 (Protected Mode)
 ```bash
 make pm         # Compila imagem bootável protected-mode
+```
+
+### Milestone 2 (Long Mode x86-64)
+```bash
+make lm         # Compila imagem bootavel long-mode
 ```
 
 ### Verificações
@@ -40,6 +47,12 @@ make pm-run     # Executa imagem PM em QEMU (headless)
 make pm-debug   # Executa com console serial em stdio e debugger
 ```
 
+### Long Mode (Milestone 2)
+```bash
+make lm-run     # Executa imagem LM em QEMU
+make lm-debug   # Executa com console serial em stdio e debugger
+```
+
 ## Estrutura de Build
 
 ```
@@ -47,8 +60,10 @@ build/
 ├── boot.bin         # Boot sector (512 bytes)
 ├── kernel.bin       # Real-mode kernel (max 4096 bytes)
 ├── kernel_pm.bin    # Protected-mode kernel (max 4096 bytes)
+├── kernel_lm.bin    # Long-mode kernel/bootstrap (max 4096 bytes)
 ├── os.img           # Final image real-mode (boot + kernel)
-└── os_pm.img        # Final image protected-mode (boot + kernel_pm)
+├── os_pm.img        # Final image protected-mode (boot + kernel_pm)
+└── os_lm.img        # Final image long-mode (boot + kernel_lm)
 ```
 
 ## Limites
@@ -56,6 +71,8 @@ build/
 - **Boot sector**: Exatamente 512 bytes (com assinatura `55 AA`)
 - **Kernel**: Máximo 8 setores = 4096 bytes
 - **Imagem total**: 512 + 4096 = 4608 bytes
+- **M2**: As tabelas PML4/PDPT/PD ficam em memoria fixa inicializada em runtime
+  para manter `kernel_lm.bin` dentro dos 8 setores carregados pelo bootloader.
 
 ## Debugging
 
@@ -82,6 +99,7 @@ xxd build/os.img | head -20
 Definidas em `include/kernel.inc`:
 
 - `COM1 = 0x3F8` - Serial port I/O address
-- `STACK_TOP = 0x7000` - Stack base (growing down)
-- `KERNEL_LOAD = 0x1000` - Kernel load address
-- `MEMORY_START = 0x2000` - Usable memory start
+- `STACK_TOP = 0x9000` - Stack real-mode
+- `STACK_TOP_PM = 0x90000` - Stack protected-mode
+- `KERNEL_LOAD_ADDR = 0x1000` - Kernel load address
+- `MEMORY_BASE = 0x2000` - Usable memory start inicial

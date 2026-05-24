@@ -1,12 +1,14 @@
-# Roadmap - Microkernel ASM
+# Roadmap - NeXus
 
-Evolução planejada do projeto through milestones, com épocas estimadas e prioridades.
+Evolução planejada do NeXus por milestones, com épocas estimadas e prioridades.
+
+**Versão atual:** `0.2.0-m2`
 
 ## Overview
 
 ```
 Real Mode      Protected Mode    Long Mode       Interrupts        User Space       ELF Loader
-   [✅]            [✅]         [🔄 Next]       [Future]          [Future]         [Future]
+   [✅]            [✅]            [🔄]         [Future]          [Future]         [Future]
 Milestone 0    Milestone 1     Milestone 2     Milestone 3       Milestone 4      Milestone 5
 ```
 
@@ -26,7 +28,7 @@ Milestone 0    Milestone 1     Milestone 2     Milestone 3       Milestone 4    
 
 ### Saída Terminal
 ```
-microkernel.asm  v0.1  |  signed by @ghostroot
+NeXus  v0.1  |  signed by @ghostroot
 -------------------------------------------------------
 
 [ok] memory allocator online
@@ -34,7 +36,7 @@ microkernel.asm  v0.1  |  signed by @ghostroot
 [ok] ipc mailbox online
 [ok] user-space server stubs registered
 
-root@microkernel:/# _
+root@nexus:/# _
 ```
 
 ### Tamanho Binário
@@ -76,36 +78,50 @@ Implementar long mode x86-64 com paginação PML4
 
 ---
 
-## Milestone 2: Long Mode x86-64 🔄 PRÓXIMO
+## Milestone 2: Long Mode x86-64 🔄 EM PROGRESSO
 
-**Estimado**: 2-3 semanas
+**Status**: Bootstrap e build concluídos em 2026-05-24; validação em QEMU pendente
+**Estimado**: Conclusão para 2026-05-31
 
 ### Objetivos
-- [ ] Setup de paginação PML4 minima
-  - [ ] PML4, PDPT, PD, PT tables
-  - [ ] Identity mapping dos primeiros 4GB
-  - [ ] Allocator de páginas
+- [x] Setup de paginação PML4 minima
+  - [x] PML4, PDPT e PD inicializadas em runtime
+  - [x] Identity mapping do primeiro 1 GiB com paginas de 2 MiB
+  - [x] Allocator fisico bump para paginas de 4 KiB
 
-- [ ] IDT (Interrupt Descriptor Table)
-  - [ ] Setup IDT em 64-bit
-  - [ ] Handlers para exceções: #DF, #GPF, #PF
-  - [ ] Stub handlers para IRQs
+- [x] IDT (Interrupt Descriptor Table)
+  - [x] Setup IDT em 64-bit
+  - [x] Handlers para exceções: #DE, #UD, #DF, #GPF, #PF
+  - [ ] Stub handlers para IRQs (próximo: M3)
 
-- [ ] Transição protected-mode → long-mode
-  - [ ] Ativar PAE no CR4
-  - [ ] Carregar CR3 com PML4 address
-  - [ ] Ativar EFER.LME para long-mode
-  - [ ] Far jump para código 64-bit
+- [x] Transição protected-mode → long-mode
+  - [x] Entrada real-mode em `kernel/longmode/kernel_lm.asm`
+  - [x] Ativar PAE no CR4
+  - [x] Carregar CR3 com PML4 address
+  - [x] Ativar EFER.LME para long-mode
+  - [x] Far jump para código 64-bit
 
-- [ ] Novo módulo: `kernel/kernel_lm.asm`
-  - [ ] Entry ponto 64-bit
-  - [ ] Serial console 64-bit
-  - [ ] Stack e registradores de modo longo
+- [x] Novo módulo: `kernel/longmode/kernel_lm.asm`
+  - [x] Entry ponto 64-bit
+  - [x] Serial console 64-bit
+  - [x] Stack e registradores de modo longo
+
+- [x] Pastas separadas para manutenção
+  - [x] `kernel/longmode/` para bootstrap e transição 64-bit
+  - [x] `kernel/paging/` para paginação e alocação de páginas
+  - [x] `kernel/interrupt/` para IDT e exceções
+  - [x] `kernel/drivers/` para drivers como serial COM1
+
+### Pendente para M2 Final
+- [ ] Validar paginacao com page fault
+- [ ] Testar todos exception handlers
+- [x] Manter `kernel_lm.bin` dentro de 4096 bytes
 
 ### Build Targets
 ```bash
 make lm         # long-mode build (os_lm.img)
 make lm-run     # execute long-mode
+make lm-debug   # execute with serial stdio and GDB stub
 ```
 
 ### Dependências
@@ -114,9 +130,9 @@ make lm-run     # execute long-mode
 
 ---
 
-## Milestone 3: Interrupções e Timer ⏱️ FUTURO
+## Milestone 3: Interrupções e Timer ⏱️ PRÓXIMO
 
-**Estimado**: 2 semanas (após M2)
+**Estimado**: 2-3 semanas (após M2)
 
 ### Objetivos
 - [ ] Timer de sistema (PIT - 8254)
@@ -200,6 +216,37 @@ make lm-run     # execute long-mode
 
 ---
 
+## Milestone 6: Runtime C/Rust 🧩 FUTURO
+
+**Estimado**: após M5, somente quando syscall, IPC e ELF estiverem estáveis
+
+### Objetivos
+- [ ] Definir headers de ABI para C
+- [ ] Criar biblioteca minima `nexus-libc` ou `nexus-rt`
+- [ ] Compilar primeiro programa userspace em C
+- [ ] Avaliar Rust `no_std` para servidores isolados
+- [ ] Definir panic strategy, linker script e contrato de alocação
+
+### Direção
+- Assembly permanece no caminho critico de CPU e interrupcoes.
+- C entra primeiro para validar ABI e loader ELF com baixo atrito.
+- Rust entra depois para servidores com estado mais complexo e isolamento.
+
+---
+
+## Subdivisões de Produto
+
+| Produto | Entrega funcional |
+| --- | --- |
+| **NeXus Core** | Kernel x86-64, memoria, interrupcoes, scheduler e IPC. |
+| **NeXus Boot** | Boot BIOS atual, futuro UEFI e validadores de imagem. |
+| **NeXus Drivers** | Serial, VGA, PIT, teclado, disco e virtio. |
+| **NeXus Services** | FS, driver manager, init e servicos em ring3. |
+| **NeXus Runtime** | Syscalls, ABI IPC, loader ELF, libc/rt minima. |
+| **NeXus SDK** | Ferramentas, exemplos, testes e documentacao de contratos. |
+
+---
+
 ## Roadmap Visual (Gráfico de Gantt)
 
 ```
@@ -207,6 +254,7 @@ Jun 2026  |████████████████ Milestone 2 (Long Mo
 Jul 2026  |    ████████████ Milestone 3 (Interrupts)
 Aug 2026  |          ██████████ Milestone 4 (Ring3 IPC)
 Sep 2026  |               ████████ Milestone 5 (ELF)
+Oct 2026  |                    ████ Milestone 6 (C/Rust Runtime)
 ```
 
 ---
@@ -220,12 +268,13 @@ Sep 2026  |               ████████ Milestone 5 (ELF)
 - **M3**: Timer real, context switching, 100+ tasks
 - **M4**: Ring3 execution, syscalls, capability IPC
 - **M5**: ELF loading, userspace programs, isolation
+- **M6**: Runtime C/Rust, primeiros programas userspace
 
 ### Gerais
 - Tamanho binário: < 64 KB total (boot + kernel + tools)
 - Build time: < 1 segundo
 - Boot time: < 100 ms to kernel ready
-- Code quality: 100% assembly, zero C/C++ dependencies
+- Code quality: Assembly no caminho critico; C/Rust apenas apos ABI estavel
 - Documentation: Complete per milestone
 
 ---
@@ -249,7 +298,8 @@ main
 ├── feature/milestone-2-longmode
 ├── feature/milestone-3-interrupts
 ├── feature/milestone-4-ring3
-└── feature/milestone-5-elf
+├── feature/milestone-5-elf
+└── feature/milestone-6-runtime
 ```
 
 **Convenção de Commits**
@@ -268,6 +318,7 @@ chore(build): description               # Build/CI changes
 ## Contato e Contribuições
 
 - Autor: @ghostroot
-- Linguagem: Pure x86 Assembly (16/32/64-bit)
+- Linguagem atual: x86 Assembly (16/32/64-bit)
+- Linguagens futuras: C e Rust `no_std` para runtime, servidores e userspace
 - Licença: Verificar LICENSE
-- Status: Active development (M2 iniciando)
+- Status: Active development (M2 long mode)
