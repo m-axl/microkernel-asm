@@ -30,11 +30,24 @@ start:
     int 0x13
     jc disk_error
 
+    ; Enable A20 line for full memory access
+    call enable_a20_bios
+    
     jmp 0x0000:KERNEL_OFFSET
 
 disk_error:
     mov si, disk_error_msg
     call bios_print
+
+enable_a20_bios:
+    ; Fast A20 method: use port 0x92
+    in al, 0x92
+    test al, 0x02
+    jnz .a20_done
+    or al, 0x02
+    out 0x92, al
+.a20_done:
+    ret
 
 .halt:
     hlt

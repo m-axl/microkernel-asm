@@ -5,6 +5,9 @@
 KERNEL_LOAD_ADDR    equ 0x1000
 STACK_TOP           equ 0x9000
 
+; Protected mode constants
+STACK_TOP_PM        equ 0x90000
+
 VGA_BUFFER          equ 0xB800
 VGA_COLS            equ 80
 VGA_ROWS            equ 25
